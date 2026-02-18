@@ -9,13 +9,8 @@ app.use(cors());
 
 const keys = new Map();
 
-function adminAuth(req, res, next) {
-  const secret = req.headers['x-admin-secret'];
-  if (!secret || secret !== process.env.ADMIN_SECRET) {
-    return res.status(401).json({ success: false, message: 'Unauthorized' });
-  }
-  next();
-}
+
+
 
 const DURATION = {
   day:      1 * 24 * 60 * 60 * 1000,
@@ -36,7 +31,7 @@ function genKey() {
 }
 
 // POST /api/admin/create-key
-app.post('/api/admin/create-key', adminAuth, (req, res) => {
+app.post('/api/admin/create-key', (req, res) => {
   const { name, type } = req.body;
   if (!name || !name.trim()) return res.status(400).json({ success: false, message: 'name là bắt buộc' });
   if (!DURATION.hasOwnProperty(type)) return res.status(400).json({ success: false, message: 'type phải là: day, week, month, lifetime' });
@@ -55,7 +50,7 @@ app.post('/api/admin/create-key', adminAuth, (req, res) => {
 });
 
 // GET /api/admin/keys
-app.get('/api/admin/keys', adminAuth, (req, res) => {
+app.get('/api/admin/keys', (req, res) => {
   const now = new Date();
   const data = [];
   for (const [key, info] of keys.entries()) {
@@ -72,7 +67,7 @@ app.get('/api/admin/keys', adminAuth, (req, res) => {
 });
 
 // PATCH /api/admin/revoke-key
-app.patch('/api/admin/revoke-key', adminAuth, (req, res) => {
+app.patch('/api/admin/revoke-key', (req, res) => {
   const { key } = req.body;
   if (!key) return res.status(400).json({ success: false, message: 'key là bắt buộc' });
   const info = keys.get(key);
@@ -82,7 +77,7 @@ app.patch('/api/admin/revoke-key', adminAuth, (req, res) => {
 });
 
 // DELETE /api/admin/delete-key
-app.delete('/api/admin/delete-key', adminAuth, (req, res) => {
+app.delete('/api/admin/delete-key', (req, res) => {
   const { key } = req.body;
   if (!key) return res.status(400).json({ success: false, message: 'key là bắt buộc' });
   if (!keys.has(key)) return res.status(404).json({ success: false, message: 'Không tìm thấy key' });
